@@ -41,7 +41,7 @@ if page == "Laboratorium 3D":
     html_path = os.path.join(os.path.dirname(__file__), "assets", "uv1800_lab.html")
     with open(html_path, "r", encoding="utf-8") as f:
         html = f.read()
-    components.html(html, height=790, scrolling=False)
+    components.html(html, height=1200, scrolling=False)
     st.markdown(
         '<p class="small-note">Petunjuk: gunakan tombol “Buka kompartemen”, “Masukkan kuvet”, “Tutup kompartemen”, dan “Ukur sampel” di dalam simulasi. '
         'Hasil numerik merupakan data demonstrasi, bukan pengukuran instrumen sungguhan.</p>',

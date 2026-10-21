@@ -1,347 +1,243 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Virtual UV-Vis Lab 3D</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Virtual UV-Vis Lab V3</title>
 <style>
-  :root { --ink:#163b42; --teal:#167d83; --mint:#dff3ef; --line:#d9e4e8; --bg:#f6f9fb; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:Inter,Segoe UI,Arial,sans-serif; color:var(--ink); background:#f7fafb; }
-  .layout { display:grid; grid-template-columns:minmax(0,1.65fr) minmax(290px,1fr); gap:12px; height:770px; padding:8px; }
-  .stage, .panel { background:white; border:1px solid var(--line); border-radius:16px; overflow:hidden; min-width:0; }
-  .stage { position:relative; display:flex; flex-direction:column; }
-  .stagehead { padding:12px 15px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #edf1f3; gap:8px; }
-  .stagehead strong { font-size:15px; }
-  .pill { background:#e6f7f1; color:#187b68; border-radius:20px; padding:5px 9px; font-size:11px; font-weight:700; white-space:nowrap; }
-  #scene { width:100%; flex:1; min-height:0; display:block; background:radial-gradient(ellipse at 48% 40%,#f5fbfc 0%,#e9f1f4 66%,#e5edf0 100%); }
-  .hint { padding:8px 12px; font-size:11px; color:#667b83; background:#fbfdfd; border-top:1px solid #edf1f3; }
-  .panel { display:flex; flex-direction:column; }
-  .tabs { display:flex; gap:4px; padding:9px; border-bottom:1px solid #e9eff1; }
-  .tab { border:0; background:#f0f5f6; color:#52686e; padding:8px 10px; border-radius:8px; font-weight:700; font-size:11px; cursor:pointer; flex:1; }
-  .tab.active { background:#dff3ef; color:#12676d; }
-  .content { padding:13px; overflow:auto; flex:1; }
-  .section-title { font-size:13px; font-weight:800; margin:0 0 8px; }
-  .muted { color:#667b83; font-size:11px; line-height:1.5; }
-  .controlrow { display:flex; gap:7px; flex-wrap:wrap; margin:8px 0 12px; }
-  button { border:1px solid #cbdde0; background:white; color:#254b51; border-radius:9px; padding:9px 10px; cursor:pointer; font-weight:700; font-size:11px; }
-  button.primary { background:#147d83; color:white; border-color:#147d83; }
-  button:hover { filter:brightness(.97); }
-  button:disabled { opacity:.45; cursor:not-allowed; }
-  .status { display:flex; align-items:center; gap:8px; padding:10px; background:#f5f9fa; border:1px solid #e3ecee; border-radius:10px; font-size:12px; margin:10px 0; }
-  .dot { width:8px; height:8px; background:#d99b36; border-radius:50%; flex-shrink:0; }
-  .dot.ok { background:#22a06b; }
-  .kv { display:grid; grid-template-columns:1fr 1fr; gap:7px; margin:10px 0; }
-  .metric { border:1px solid #e4ecee; border-radius:10px; padding:10px; }
-  .metric label { display:block; color:#71858a; font-size:10px; margin-bottom:5px; }
-  .metric strong { font-size:19px; }
-  .computer { background:#101c26; color:#e3f4f4; border-radius:12px; padding:10px; margin-bottom:10px; box-shadow:inset 0 0 0 1px #31444e; }
-  .screenbar { display:flex; justify-content:space-between; align-items:center; font-size:10px; color:#9fc6ca; padding-bottom:8px; border-bottom:1px solid #2e4650; }
-  .screen-title { font-size:15px; font-weight:800; margin:10px 0 4px; }
-  .screen-sub { font-size:10px; color:#a8c0c5; }
-  .computer label { display:block; font-size:10px; color:#aac6ca; margin:10px 0 4px; }
-  .computer select, .computer input { width:100%; background:#1d303b; color:#e7f5f5; border:1px solid #405761; border-radius:7px; padding:8px; font-size:12px; }
-  .result { min-height:50px; padding:10px; border-radius:9px; background:#192b35; border:1px solid #304650; font-size:12px; line-height:1.5; }
-  .screen-button { width:100%; margin-top:9px; background:#7ee0c3; color:#123e3c; border:0; }
-  .log { background:#f7fafb; border:1px solid #e3ecee; border-radius:10px; padding:10px; font-size:11px; line-height:1.65; min-height:80px; color:#52676d; }
-  .log div + div { border-top:1px solid #e8eff0; padding-top:4px; margin-top:4px; }
-  .badge { display:inline-block; font-size:10px; padding:4px 7px; border-radius:20px; background:#eef4f5; color:#536c71; margin:2px 2px 2px 0; }
-  @media(max-width:850px) { .layout { grid-template-columns:1fr; height:auto; } #scene {height:430px; flex:none;} .stage {min-height:520px;} .panel {min-height:600px;} }
+:root{--ink:#153b43;--muted:#637d83;--teal:#0e827d;--pale:#e5f5f2;--line:#d9e6e8;--panel:#0d202a;--panel2:#132d39;--gold:#ffc75f}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink);background:#f4f8f9}
+.shell{max-width:1250px;margin:auto;padding:12px}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 14px;background:white;border:1px solid var(--line);border-radius:14px 14px 0 0}
+.brand{font-weight:800;letter-spacing:.01em}.subbrand{font-size:12px;color:var(--muted);margin-top:3px}
+.pill{font-size:11px;font-weight:800;letter-spacing:.04em;padding:7px 10px;border-radius:99px;background:var(--pale);color:var(--teal)}
+.viewer{position:relative;background:linear-gradient(#eaf2f4,#dfe9ec);border:1px solid var(--line);border-top:0;overflow:hidden}
+#scene{display:block;width:100%;height:490px;touch-action:none}
+.viewer-note{padding:9px 13px;background:#fff;color:var(--muted);font-size:12px;border-top:1px solid var(--line)}
+.layout{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(320px,.85fr);gap:12px;margin-top:12px}
+.card{background:white;border:1px solid var(--line);border-radius:14px;overflow:hidden;min-width:0}
+.cardhead{padding:12px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.cardhead h2{font-size:15px;margin:0}
+.tabs{display:flex;gap:5px;padding:8px;background:#f3f7f8}
+.tab{flex:1;border:0;border-radius:9px;padding:10px 8px;background:#e9f0f1;color:#4d676d;font-weight:700;cursor:pointer}
+.tab.active{background:#d9f1ed;color:#096f6b}
+.panel{padding:14px}
+.hidden{display:none!important}
+.info-title{font-size:18px;font-weight:800;margin:0 0 5px}
+.kicker{font-size:11px;color:var(--teal);font-weight:800;text-transform:uppercase;letter-spacing:.08em}
+.muted{font-size:13px;color:var(--muted);line-height:1.5}
+.partlist{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.partchip{border:1px solid #d6e5e6;background:#f7fbfb;color:#345a60;border-radius:99px;padding:7px 10px;font-size:12px;cursor:pointer}
+.partchip:hover,.partchip.selected{background:#d9f1ed;border-color:#70c6bb;color:#075e5b}
+label{display:block;font-size:12px;color:#c1d5d9;margin:12px 0 6px}
+select,input[type=number],input[type=range]{width:100%}
+select,input[type=number]{border:1px solid #395662;border-radius:9px;background:#19323d;color:#edf8fa;padding:10px;font:inherit}
+input[type=range]{accent-color:#24a9a0}
+.controls{background:var(--panel);color:#eff8f9;border-radius:12px;padding:14px}
+.controls h3{font-size:17px;margin:7px 0 2px}.controls .small{font-size:12px;color:#abc4ca}
+.btnrow{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}
+button.action{border:0;border-radius:9px;background:#167e79;color:white;padding:10px 12px;font-weight:800;cursor:pointer}
+button.action.secondary{background:#294552;color:#e6f5f7;border:1px solid #3a5964}
+button.action:disabled{opacity:.4;cursor:not-allowed}
+.status{font-size:12px;padding:8px 10px;background:#18333e;border-radius:8px;margin-top:10px;color:#b9d9dc}
+.readings{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.metric{padding:10px;background:#17313c;border:1px solid #2b4b57;border-radius:10px}
+.metric .name{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:#9ebcc2}
+.metric .value{font-size:20px;font-weight:800;margin-top:4px;color:white}
+.metric .unit{font-size:10px;color:#b8cdd1}
+.chartbox{margin-top:12px;background:#fff;border:1px solid var(--line);border-radius:12px;padding:10px}
+.charttitle{font-weight:800;font-size:13px;margin:2px 0 8px}
+canvas#chart{width:100%;height:190px;display:block}
+.step{display:flex;gap:9px;align-items:flex-start;margin:9px 0}.stepnum{width:23px;height:23px;border-radius:50%;background:#d9f1ed;color:#096f6b;font-weight:800;display:grid;place-items:center;flex-shrink:0;font-size:12px}
+.step p{margin:2px 0;font-size:12px;line-height:1.45;color:var(--muted)}
+.foot{font-size:11px;line-height:1.5;color:#748a8f;padding:12px 2px}
+@media(max-width:760px){.layout{grid-template-columns:1fr}#scene{height:360px}.readings{grid-template-columns:repeat(3,1fr)}}
 </style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"}}
+</script>
 </head>
 <body>
-<div class="layout">
-  <section class="stage">
-    <div class="stagehead">
-      <strong>3D Instrument & Workstation</strong>
-      <span class="pill">INTERACTIVE MODEL</span>
-    </div>
-    <canvas id="scene"></canvas>
-    <div class="hint">Mouse: seret untuk memutar • Scroll untuk zoom • Tombol di panel untuk membuka kompartemen dan menjalankan simulasi.</div>
-  </section>
-  <section class="panel">
-    <div class="tabs">
-      <button class="tab active" data-tab="instrument">Instrumen</button>
-      <button class="tab" data-tab="software">Software PC</button>
-      <button class="tab" data-tab="guide">Panduan</button>
-    </div>
-    <div class="content" id="content-instrument">
-      <p class="section-title">Kontrol instrumen</p>
-      <p class="muted">Pilih tindakan untuk mengikuti alur kerja dasar. Kompartemen harus ditutup dan kuvet terpasang sebelum pengukuran simulasi.</p>
-      <div class="status"><span class="dot" id="statusDot"></span><span id="statusText">Kompartemen tertutup • belum ada kuvet</span></div>
-      <div class="controlrow">
-        <button id="openBtn" class="primary">Buka kompartemen</button>
-        <button id="cuvetteBtn">Masukkan kuvet</button>
-        <button id="closeBtn">Tutup kompartemen</button>
+<div class="shell">
+  <div class="topline"><div><div class="brand">UV-Vis Virtual Laboratory</div><div class="subbrand">Interactive instrument model • V3 educational simulation</div></div><span class="pill">3D INTERACTIVE</span></div>
+  <div class="viewer"><canvas id="scene"></canvas><div class="viewer-note">Seret untuk memutar • Scroll untuk zoom • Klik komponen alat atau pilih label bagian di bawah.</div></div>
+  <div class="layout">
+    <section class="card">
+      <div class="tabs">
+        <button class="tab active" data-tab="parts">Bagian alat</button>
+        <button class="tab" data-tab="controls">Kontrol</button>
+        <button class="tab" data-tab="pc">Software PC</button>
       </div>
-      <div class="controlrow">
-        <button id="resetViewBtn">Reset sudut pandang</button>
-        <button id="resetBtn">Reset praktikum</button>
+      <div id="partsPanel" class="panel">
+        <div class="kicker">Kenali instrumen</div><h2 class="info-title" id="partTitle">Bodi instrumen</h2>
+        <div class="muted" id="partDesc">Casing melindungi sistem optik dan elektronik. Klik bagian model atau tombol bagian di bawah untuk melihat penjelasan.</div>
+        <div class="partlist" id="partList"></div>
+        <div class="chartbox"><div class="charttitle">Alur pengukuran UV-Vis (ilustrasi)</div>
+          <div class="step"><div class="stepnum">1</div><p><b>Sumber cahaya</b> menyediakan radiasi UV dan tampak sesuai rentang panjang gelombang.</p></div>
+          <div class="step"><div class="stepnum">2</div><p><b>Monokromator</b> memilih pita panjang gelombang yang akan melewati sampel.</p></div>
+          <div class="step"><div class="stepnum">3</div><p><b>Kuvet</b> menahan blanko atau sampel pada lintasan optik.</p></div>
+          <div class="step"><div class="stepnum">4</div><p><b>Detektor dan elektronik</b> mengubah cahaya yang diterima menjadi sinyal untuk dihitung.</p></div>
+        </div>
       </div>
-      <div class="kv">
-        <div class="metric"><label>Panjang gelombang</label><strong id="waveMetric">540 <small>nm</small></strong></div>
-        <div class="metric"><label>Status pengukuran</label><strong id="measureMetric" style="font-size:15px">Standby</strong></div>
+      <div id="controlsPanel" class="panel hidden">
+        <div class="kicker">Kondisi alat</div><h2 class="info-title">Kompartemen sampel</h2>
+        <p class="muted">Kuvet hanya dapat dimasukkan saat kompartemen terbuka. Untuk simulasi pembacaan, kompartemen harus tertutup.</p>
+        <div class="btnrow">
+          <button class="action" id="openLid">Buka kompartemen</button>
+          <button class="action secondary" id="insertCuvette">Masukkan kuvet</button>
+          <button class="action secondary" id="closeLid">Tutup kompartemen</button>
+        </div>
+        <div class="status" id="instrumentStatus">Status: siap. Kompartemen tertutup; kuvet belum dipasang.</div>
+        <div class="chartbox"><div class="charttitle">Status instrumen</div><div class="muted" id="statusSummary">Buka kompartemen untuk memulai penyiapan sampel.</div></div>
       </div>
-      <p class="section-title">Bagian yang dapat dikenali</p>
-      <div id="partInfo" class="log">Klik bagian instrumen pada model 3D untuk melihat keterangan.</div>
-      <p style="margin-top:10px"><span class="badge">Casing</span><span class="badge">Panel depan</span><span class="badge">Layar instrumen</span><span class="badge">Kompartemen kuvet</span><span class="badge">Workstation</span></p>
-    </div>
-    <div class="content" id="content-software" style="display:none">
-      <div class="computer">
-        <div class="screenbar"><span>VIRTUAL UV CONTROL</span><span>● CONNECTED*</span></div>
-        <div class="screen-title">UV-Vis Measurement</div>
-        <div class="screen-sub">Educational software interface • workstation simulation</div>
-        <label for="mode">Mode pengukuran</label>
-        <select id="mode">
-          <option value="sample">Sample measurement</option>
-          <option value="blank">Blank check</option>
-          <option value="scan">Wavelength scan (demo)</option>
-        </select>
-        <label for="wavelength">Wavelength (nm)</label>
-        <input id="wavelength" type="range" min="200" max="800" step="1" value="540">
-        <div class="screen-sub">Set wavelength: <strong id="wavelengthLabel">540 nm</strong></div>
-        <label for="concentration">Demo concentration (mg/L)</label>
-        <input id="concentration" type="number" min="0" max="100" step="0.1" value="10">
-        <button id="measureBtn" class="screen-button">▶ RUN MEASUREMENT</button>
-        <label>Result window</label>
-        <div class="result" id="resultWindow">Instrument ready.<br>Load a cuvette and close the compartment to begin.</div>
+      <div id="pcPanel" class="panel hidden">
+        <div class="controls">
+          <div class="small">● VIRTUAL UV CONTROL • EDUCATIONAL MODE</div>
+          <h3>UV-Vis Measurement</h3><div class="small">Parameter simulasi dan pembacaan</div>
+          <label for="mode">Mode pengukuran</label>
+          <select id="mode"><option value="blank">Blanko / Auto-zero</option><option value="sample" selected>Pengukuran sampel</option><option value="scan">Pemindaian spektrum</option></select>
+          <label for="wavelength">Panjang gelombang: <span id="wlText">540</span> nm</label>
+          <input id="wavelength" type="range" min="200" max="800" value="540" step="1">
+          <label for="conc">Konsentrasi demonstrasi (mg/L)</label>
+          <input id="conc" type="number" min="0" max="100" value="10" step="0.5">
+          <div class="btnrow">
+            <button class="action secondary" id="zeroBtn">Jalankan blanko</button>
+            <button class="action" id="measureBtn">Ukur sampel</button>
+            <button class="action secondary" id="scanBtn">Pindai spektrum</button>
+            <button class="action secondary" id="resetBtn">Reset</button>
+          </div>
+          <div class="status" id="measurementStatus">Siap. Pasang kuvet dan tutup kompartemen sebelum pengukuran.</div>
+          <div class="readings">
+            <div class="metric"><div class="name">Absorbansi</div><div class="value" id="absValue">—</div><div class="unit">AU</div></div>
+            <div class="metric"><div class="name">Transmitansi</div><div class="value" id="transValue">—</div><div class="unit">%T</div></div>
+            <div class="metric"><div class="name">Panjang gelombang</div><div class="value" id="readWl">—</div><div class="unit">nm</div></div>
+          </div>
+        </div>
+        <div class="chartbox"><div class="charttitle">Spektrum absorbansi simulasi</div><canvas id="chart" width="650" height="230"></canvas><div class="muted">Kurva demonstrasi berbentuk pita serapan sederhana; bukan spektrum senyawa nyata.</div></div>
       </div>
-      <p class="muted">*“Connected” hanya menunjukkan hubungan antarmuka simulasi di dalam aplikasi. Tidak ada koneksi fisik ke spektrofotometer.</p>
-      <p class="section-title">Ringkasan hasil</p>
-      <div class="kv">
-        <div class="metric"><label>Absorbansi (simulasi)</label><strong id="absResult">—</strong></div>
-        <div class="metric"><label>Transmitansi (simulasi)</label><strong id="transResult">—</strong></div>
+    </section>
+    <aside class="card">
+      <div class="cardhead"><h2>Urutan kerja</h2><span class="pill" id="stepBadge">LANGKAH 1</span></div>
+      <div class="panel">
+        <div class="step"><div class="stepnum">1</div><p><b>Kenali bagian alat</b><br>Klik bodi, layar, kompartemen, kuvet, atau jalur cahaya pada model.</p></div>
+        <div class="step"><div class="stepnum">2</div><p><b>Siapkan sampel</b><br>Buka kompartemen, masukkan kuvet, kemudian tutup kompartemen.</p></div>
+        <div class="step"><div class="stepnum">3</div><p><b>Set blanko</b><br>Pilih Software PC dan jalankan blanko untuk membuat referensi simulasi.</p></div>
+        <div class="step"><div class="stepnum">4</div><p><b>Ukur sampel</b><br>Ubah panjang gelombang/konsentrasi lalu ukur atau pindai spektrum.</p></div>
+        <div class="chartbox"><div class="charttitle">Komponen yang dipilih</div><div class="kicker" id="selectedPartType">INSTRUMEN</div><h2 class="info-title" id="sidePartTitle">Bodi instrumen</h2><p class="muted" id="sidePartDesc">Casing luar melindungi sistem dan menjaga komponen tetap pada posisinya.</p></div>
       </div>
-    </div>
-    <div class="content" id="content-guide" style="display:none">
-      <p class="section-title">Alur praktikum virtual</p>
-      <div class="log">
-        <div><strong>1. Persiapan.</strong> Kenali bagian instrumen dan workstation.</div>
-        <div><strong>2. Buka kompartemen.</strong> Klik “Buka kompartemen”.</div>
-        <div><strong>3. Masukkan kuvet.</strong> Letakkan kuvet demonstrasi ke dudukan.</div>
-        <div><strong>4. Tutup kompartemen.</strong> Tutup sebelum menjalankan pengukuran.</div>
-        <div><strong>5. Atur parameter.</strong> Buka tab Software PC, pilih mode dan panjang gelombang.</div>
-        <div><strong>6. Ukur.</strong> Klik RUN MEASUREMENT untuk menampilkan data simulasi.</div>
-      </div>
-      <p class="section-title" style="margin-top:15px">Catatan pembelajaran</p>
-      <p class="muted">Model ini dibuat untuk eksplorasi visual dan latihan urutan kerja. Nilai hasil tidak berasal dari sumber cahaya, detektor, atau sampel nyata. Ikuti SOP dan manual instrumen untuk praktikum sesungguhnya.</p>
-    </div>
-  </section>
+    </aside>
+  </div>
+  <div class="foot">Catatan: ini adalah model edukasi terinspirasi bentuk umum Shimadzu UV-1800, bukan CAD resmi, perangkat lunak resmi, atau koneksi ke instrumen fisik. Semua pembacaan merupakan data simulasi.</div>
 </div>
-  <script type="importmap">
-{
-  "imports": {
-    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
-    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
-  }
-}
-</script>
 <script type="module">
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js';
-import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/controls/OrbitControls.js';
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
-const canvas = document.getElementById('scene');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true, alpha:true});
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.shadowMap.enabled = true;
-renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-renderer.outputColorSpace = THREE.SRGBColorSpace;
-renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
-const scene = new THREE.Scene();
-scene.background = new THREE.Color('#eaf2f4');
-const camera = new THREE.PerspectiveCamera(36, 1, 0.1, 100);
-camera.position.set(8.7, 6.3, 10.7);
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.target.set(0, 1.4, 0);
-controls.enableDamping = true;
-controls.dampingFactor = 0.06;
-controls.minDistance = 5;
-controls.maxDistance = 19;
-controls.maxPolarAngle = Math.PI * 0.48;
-
-scene.add(new THREE.HemisphereLight(0xf4ffff, 0x657680, 2.0));
-const key = new THREE.DirectionalLight(0xffffff, 3.2); key.position.set(5,10,7); key.castShadow=true; scene.add(key);
-const fill = new THREE.DirectionalLight(0xb8e6ed, 1.7); fill.position.set(-7,5,-4); scene.add(fill);
-const rim = new THREE.DirectionalLight(0xffffff, 1.3); rim.position.set(0,7,-7); scene.add(rim);
-
-const mat = (color, roughness=0.45, metalness=0.05) => new THREE.MeshStandardMaterial({color, roughness, metalness});
-const white = mat('#e6e9e8',0.38,0.08), shellTop = mat('#f4f5f1',0.3,0.05), dark = mat('#29373d',0.3,0.18);
-const black = mat('#121c22',0.25,0.1), teal = mat('#16858a',0.32,0.12), screenMat = new THREE.MeshStandardMaterial({color:'#142a34', emissive:'#153b47', emissiveIntensity:0.55, roughness:0.2});
-const steel = mat('#9da9ac',0.25,0.7), glass = new THREE.MeshPhysicalMaterial({color:'#9be7e0', transparent:true, opacity:0.4, roughness:0.1, metalness:0.1});
-const floorMat = mat('#e4ecef',0.82,0);
-const clickable = [];
-function addBox(parent, name, size, position, material, opts={}) {
-  const geo = new THREE.BoxGeometry(...size);
-  const mesh = new THREE.Mesh(geo, material);
-  mesh.name = name; mesh.position.set(...position); mesh.castShadow=true; mesh.receiveShadow=true;
-  if(opts.rotation) mesh.rotation.set(...opts.rotation);
-  parent.add(mesh);
-  if(opts.clickable) clickable.push(mesh);
-  return mesh;
+const canvas=document.getElementById('scene');
+const scene=new THREE.Scene(); scene.background=new THREE.Color('#eaf2f4');
+const camera=new THREE.PerspectiveCamera(38,1,0.1,100); camera.position.set(7.7,5.5,8.8);
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true,alpha:false}); renderer.setPixelRatio(Math.min(devicePixelRatio,2)); renderer.shadowMap.enabled=true; renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+const controls=new OrbitControls(camera,renderer.domElement); controls.enableDamping=true; controls.target.set(0,1.05,0); controls.minDistance=5; controls.maxDistance=17;
+scene.add(new THREE.HemisphereLight(0xffffff,0x9aabb1,2.1));
+const key=new THREE.DirectionalLight(0xffffff,2.5);key.position.set(5,9,7);key.castShadow=true;scene.add(key);
+const fill=new THREE.DirectionalLight(0xbde9ff,1.1);fill.position.set(-6,4,-5);scene.add(fill);
+const mat=(color,roughness=.55,metalness=.05)=>new THREE.MeshStandardMaterial({color,roughness,metalness});
+const white=mat('#e9edef',.48,.08), topWhite=mat('#f6f7f7',.4,.06), dark=mat('#15242b',.35,.25), black=mat('#101b20',.3,.2), teal=mat('#197f83',.3,.25), glass=new THREE.MeshPhysicalMaterial({color:'#a5e7ee',transparent:true,opacity:.34,roughness:.12,metalness:.05}), gold=mat('#ffca62',.3,.2);
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(200,200),mat('#e4ecee',.9));floor.rotation.x=-Math.PI/2;floor.position.y=-.03;floor.receiveShadow=true;scene.add(floor);
+const raycaster=new THREE.Raycaster(), mouse=new THREE.Vector2(), clickable=[];
+function box(name,desc,size,pos,material,opts={}){const mesh=new THREE.Mesh(new THREE.BoxGeometry(...size),material);mesh.position.set(...pos);mesh.castShadow=true;mesh.receiveShadow=true;mesh.userData={name,desc,type:opts.type||'Komponen instrumen'};scene.add(mesh);if(opts.click!==false)clickable.push(mesh);return mesh;}
+function cylinder(name,desc,r1,r2,h,pos,material){const m=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,24),material);m.position.set(...pos);m.castShadow=true;m.userData={name,desc,type:'Komponen instrumen'};scene.add(m);clickable.push(m);return m;}
+function labelPart(name,desc,mesh){mesh.userData={name,desc,type:'Komponen instrumen'};if(!clickable.includes(mesh))clickable.push(mesh);return mesh;}
+// UV-1800-inspired outer casing; intentionally an educational approximation.
+box('Bodi utama','Casing utama melindungi sistem optik, catu daya, dan elektronik. Permukaan luar dibuat menyerupai bentuk umum instrumen UV-1800.',[5.4,1.55,3.25],[0,.86,0],white);
+box('Panel atas','Permukaan atas casing; pada instrumen nyata, komponen optik berada di bagian dalam casing.',[5.32,.13,3.18],[0,1.69,0],topWhite);
+box('Panel depan','Panel depan menjadi area antarmuka pengguna dan akses kompartemen sampel.',[5.18,.72,.12],[0,.9,1.64],white);
+const display=box('Layar instrumen','Layar menampilkan parameter atau status instrumen. Pada model ini, layar adalah bagian visual edukasi.',[1.3,.56,.045],[1.52,1.1,1.72],dark);
+box('Area layar','Area tampilan digital pada panel depan.',[1.12,.36,.02],[1.52,1.11,1.752],teal);
+box('Tombol panel','Tombol kontrol instrumen digunakan untuk navigasi/pengoperasian. Tombol pada model merupakan representasi visual.',[.9,.14,.1],[1.52,.72,1.74],dark);
+for(let i=0;i<6;i++){const b=box('Tombol kontrol','Tombol panel depan sebagai representasi antarmuka kontrol.',[.1,.07,.045],[1.18+i*.135,.72,1.82],i===2?gold:teal);b.userData={name:'Tombol kontrol',desc:'Representasi tombol fisik pada panel depan; simulasi pengukuran dijalankan melalui tab Software PC.',type:'Antarmuka'};}
+box('Pintu kompartemen','Penutup kompartemen melindungi kuvet dari cahaya luar selama pembacaan. Buka hanya saat memasukkan atau mengambil kuvet.',[1.45,.72,.12],[-1.25,.91,1.72],topWhite);
+box('Bingkai kompartemen','Bingkai akses ruang sampel tempat pemegang kuvet berada.',[1.65,.86,.08],[-1.25,.91,1.68],dark);
+const lidPivot=new THREE.Group();lidPivot.position.set(-1.25,1.32,1.68);scene.add(lidPivot);
+const lid=new THREE.Mesh(new THREE.BoxGeometry(1.5,.08,.86),topWhite);lid.position.set(0,.04,-.4);lid.castShadow=true;lid.userData={name:'Penutup kompartemen',desc:'Penutup kompartemen sampel. Buka saat memasukkan kuvet dan tutup kembali sebelum pembacaan.',type:'Komponen bergerak'};lidPivot.add(lid);clickable.push(lid);
+const hinge=cylinder('Engsel penutup','Engsel memungkinkan penutup kompartemen dibuka dan ditutup.',.07,.07,1.45,[-1.25,1.32,1.7],dark);
+box('Meja sampel','Platform bagian dalam kompartemen sebagai tempat kuvet diletakkan.',[1.05,.08,.72],[-1.25,.53,1.02],dark);
+const holder=box('Pemegang kuvet','Pemegang menjaga kuvet tetap tegak dan pada posisi lintasan optik.',[.45,.13,.45],[-1.25,.65,.98],teal);
+const cuvetteGroup=new THREE.Group();cuvetteGroup.position.set(-1.25,.72,.98);scene.add(cuvetteGroup);
+const cuv=new THREE.Mesh(new THREE.BoxGeometry(.22,.48,.22),glass);cuv.castShadow=true;cuvetteGroup.add(cuv);cuv.userData={name:'Kuvet','desc':'Kuvet menampung blanko atau sampel. Panjang lintasan optik kuvet umum adalah 1 cm; material kuvet dipilih sesuai daerah panjang gelombang.',type:'Wadah sampel'};clickable.push(cuv);
+const cuvTop=new THREE.Mesh(new THREE.BoxGeometry(.24,.05,.24),teal);cuvTop.position.y=.25;cuvetteGroup.add(cuvTop);labelPart('Kuvet','Kuvet menampung larutan blanko atau sampel pada lintasan optik.',cuvTop);
+cuvetteGroup.visible=false;
+// Stylized computer/workstation on the right.
+box('Keyboard komputer','Keyboard merupakan bagian workstation simulasi, bukan bagian instrumen UV-1800.',[1.65,.09,.62],[4.2,.15,-.15],dark,{type:'Workstation'});
+const monitorStand=cylinder('Penyangga monitor','Penyangga menahan layar workstation.',.09,.12,.65,[4.15,.52,-.65],dark);
+box('Monitor komputer','Monitor menampilkan antarmuka simulasi pengukuran dan hasil pembacaan.',[2.05,1.35,.12],[4.15,1.35,-.72],dark,{type:'Workstation'});
+box('Layar monitor','Layar workstation menampilkan perangkat lunak simulasi UV-Vis.',[1.83,1.12,.035],[4.15,1.37,-.64],mat('#0c2833',.3),{type:'Workstation'});
+// Stylized cable connects instrument and workstation visually.
+const cablePoints=[new THREE.Vector3(2.55,.22,.5),new THREE.Vector3(2.95,.12,.8),new THREE.Vector3(3.35,.12,.55),new THREE.Vector3(3.55,.18,.0)];
+const cable=new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(cablePoints),40,.035,8,false),black);cable.userData={name:'Kabel workstation (visual)','desc':'Kabel ini hanya menggambarkan hubungan visual antara komputer dan instrumen. Aplikasi tidak terhubung ke alat fisik.',type:'Workstation'};scene.add(cable);clickable.push(cable);
+// Stylized optical-path overlay inside front cutaway: source, monochromator, cuvette, detector.
+const optical=new THREE.Group();scene.add(optical);
+const source=cylinder('Sumber cahaya','Sumber cahaya menyediakan radiasi pada rentang UV dan tampak. Pada instrumen UV-Vis, sumber UV dan tampak dapat menggunakan lampu berbeda.',.19,.19,.32,[-2.0,.62,-.4],gold);
+const mono=box('Monokromator','Monokromator memilih pita panjang gelombang yang akan melewati sampel. Pada instrumen nyata, sistem ini melibatkan elemen optik seperti kisi difraksi.',[.62,.42,.5],[-.9,.68,-.4],teal);
+const detector=box('Detektor','Detektor mengubah intensitas cahaya yang diterima menjadi sinyal listrik untuk dihitung menjadi absorbansi atau transmitansi.',[.4,.38,.42],[.2,.66,-.4],gold);
+const beamMat=new THREE.MeshBasicMaterial({color:0x21b8f0,transparent:true,opacity:.75});
+const beam=new THREE.Mesh(new THREE.CylinderGeometry(.035,.035,2.0,12),beamMat);beam.rotation.z=Math.PI/2;beam.position.set(-.9,.78,-.4);beam.visible=false;scene.add(beam);
+[source,mono,detector].forEach(o=>clickable.push(o));
+// Part metadata chips
+const parts=[
+['Bodi utama','Casing utama melindungi sistem optik, catu daya, dan elektronik.'],
+['Panel depan','Area antarmuka pengguna dan akses ke kompartemen sampel.'],
+['Layar instrumen','Menampilkan parameter atau status instrumen; pada model ini bersifat visual edukasi.'],
+['Tombol kontrol','Representasi tombol fisik. Simulasi pembacaan dijalankan melalui Software PC.'],
+['Penutup kompartemen','Melindungi sampel dari cahaya luar; buka untuk memasukkan kuvet dan tutup sebelum membaca.'],
+['Pemegang kuvet','Menjaga kuvet berada pada posisi yang tepat dalam lintasan optik.'],
+['Kuvet','Wadah blanko atau sampel; kuvet umum memiliki panjang lintasan optik 1 cm.'],
+['Sumber cahaya','Menyediakan radiasi UV dan tampak yang digunakan untuk pengukuran.'],
+['Monokromator','Memilih panjang gelombang yang akan melewati sampel.'],
+['Detektor','Mengubah cahaya yang diterima menjadi sinyal untuk dihitung.'],
+['Monitor komputer','Menampilkan perangkat lunak simulasi dan hasil pembacaan.'],
+['Kabel workstation (visual)','Gambaran hubungan komputer dan instrumen; tidak mewakili komunikasi perangkat keras nyata.']
+];
+const partList=document.getElementById('partList');
+function setPart(name,desc,type='Komponen instrumen'){
+ document.getElementById('partTitle').textContent=name;document.getElementById('partDesc').textContent=desc;
+ document.getElementById('sidePartTitle').textContent=name;document.getElementById('sidePartDesc').textContent=desc;document.getElementById('selectedPartType').textContent=type.toUpperCase();
+ document.querySelectorAll('.partchip').forEach(c=>c.classList.toggle('selected',c.dataset.name===name));
 }
-function addCylinder(parent,name,radius,height,position,material,segments=32) {
-  const m=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,height,segments),material);
-  m.name=name; m.position.set(...position); m.castShadow=true; parent.add(m); clickable.push(m); return m;
+parts.forEach(([name,desc])=>{const b=document.createElement('button');b.className='partchip';b.textContent=name;b.dataset.name=name;b.onclick=()=>setPart(name,desc);partList.appendChild(b);});
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();const chart=document.getElementById('chart');if(chart){chart.width=Math.max(300,chart.clientWidth*devicePixelRatio);chart.height=Math.max(180,chart.clientHeight*devicePixelRatio);drawChart();}}
+window.addEventListener('resize',resize);
+canvas.addEventListener('pointerdown',e=>{const r=canvas.getBoundingClientRect();mouse.x=((e.clientX-r.left)/r.width)*2-1;mouse.y=-((e.clientY-r.top)/r.height)*2+1;raycaster.setFromCamera(mouse,camera);const hits=raycaster.intersectObjects(clickable,true);if(hits.length){let o=hits[0].object;while(o&&!o.userData.name)o=o.parent;if(o&&o.userData.name)setPart(o.userData.name,o.userData.desc||'Komponen model 3D.',o.userData.type||'Komponen instrumen');}});
+function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);} 
+// Tabs
+document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn));['parts','controls','pc'].forEach(k=>document.getElementById(k+'Panel').classList.toggle('hidden',btn.dataset.tab!==k));}));
+let lidOpen=false,hasCuvette=false,blankReady=false,measurementReady=false,animStart=0;
+function status(){let s=`Kompartemen ${lidOpen?'terbuka':'tertutup'}; kuvet ${hasCuvette?'terpasang':'belum dipasang'}.`;document.getElementById('instrumentStatus').textContent='Status: '+s;document.getElementById('statusSummary').textContent=s;if(!lidOpen&&hasCuvette)document.getElementById('stepBadge').textContent='SIAP UKUR';else document.getElementById('stepBadge').textContent='PENYIAPAN';}
+document.getElementById('openLid').onclick=()=>{lidOpen=true;lidPivot.rotation.x=-1.18;status();document.getElementById('measurementStatus').textContent='Kompartemen terbuka. Masukkan kuvet.';};
+document.getElementById('insertCuvette').onclick=()=>{if(!lidOpen){document.getElementById('measurementStatus').textContent='Buka kompartemen terlebih dahulu.';return;}hasCuvette=true;cuvetteGroup.visible=true;status();document.getElementById('measurementStatus').textContent='Kuvet terpasang. Tutup kompartemen sebelum pembacaan.';};
+document.getElementById('closeLid').onclick=()=>{lidOpen=false;lidPivot.rotation.x=0;status();document.getElementById('measurementStatus').textContent=hasCuvette?'Kompartemen tertutup. Siap menjalankan blanko atau sampel.':'Kompartemen tertutup, tetapi kuvet belum dipasang.';};
+const wl=document.getElementById('wavelength');wl.oninput=()=>{document.getElementById('wlText').textContent=wl.value;};
+function absorbance(w,c){const peak=540,sigma=48;const epsilon=0.95*Math.exp(-0.5*Math.pow((w-peak)/sigma,2));return Math.max(0,epsilon*(Math.max(0,c)/10));}
+function drawChart(){
+ const ch=document.getElementById('chart');if(!ch)return;const ctx=ch.getContext('2d'),w=ch.width,h=ch.height;ctx.clearRect(0,0,w,h);
+ const pad={l:42,r:12,t:14,b:32},pw=w-pad.l-pad.r,ph=h-pad.t-pad.b;
+ ctx.strokeStyle='#e2ebed';ctx.lineWidth=1;ctx.fillStyle='#647d83';ctx.font=`${Math.max(10,11*devicePixelRatio)}px sans-serif`;
+ for(let i=0;i<=4;i++){const y=pad.t+ph*i/4;ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(w-pad.r,y);ctx.stroke();ctx.fillText((1-i/4).toFixed(2),3,y+4);}
+ for(let i=0;i<=6;i++){const x=pad.l+pw*i/6;ctx.fillText(String(200+i*100),x-12,h-9);}
+ ctx.strokeStyle='#118b87';ctx.lineWidth=2.5*devicePixelRatio;ctx.beginPath();
+ const c=Number(document.getElementById('conc').value)||0;
+ for(let i=0;i<=240;i++){const nm=200+i*600/240;const a=Math.min(1,absorbance(nm,c));const x=pad.l+pw*i/240,y=pad.t+ph*(1-a);if(i===0)ctx.moveTo(x,y);else ctx.lineTo(x,y);}ctx.stroke();
+ const xwl=pad.l+pw*(Number(wl.value)-200)/600;ctx.strokeStyle='#f0a832';ctx.setLineDash([5,4]);ctx.beginPath();ctx.moveTo(xwl,pad.t);ctx.lineTo(xwl,pad.t+ph);ctx.stroke();ctx.setLineDash([]);
 }
-
-// Lab bench and subtle base shadow
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(200,200), floorMat);
-floor.rotation.x=-Math.PI/2; floor.position.y=-0.04; floor.receiveShadow=true; scene.add(floor);
-const bench = new THREE.Group(); scene.add(bench);
-
-// UV-1800-inspired housing, front faces toward +Z
-const instrument = new THREE.Group(); instrument.position.set(-1.45,0,0.3); scene.add(instrument);
-addBox(instrument,'Base instrumen',[4.6,0.42,3.0],[0,0.55,0],dark);
-addBox(instrument,'Casing utama',[4.52,1.42,2.94],[0,1.42,0],white,{clickable:true});
-addBox(instrument,'Panel atas',[4.44,0.16,2.82],[0,2.2,-0.02],shellTop);
-addBox(instrument,'Panel depan',[4.35,0.62,0.11],[0,1.35,1.49],mat('#dce1df',0.42,0.06),{clickable:true});
-addBox(instrument,'Panel layar',[1.13,0.7,0.12],[-1.27,1.48,1.57],dark);
-addBox(instrument,'Layar instrumen',[0.92,0.48,0.035],[-1.27,1.49,1.645],screenMat,{clickable:true});
-addBox(instrument,'Layar header',[0.78,0.035,0.012],[-1.27,1.67,1.668],teal);
-addBox(instrument,'Layar garis data',[0.56,0.018,0.012],[-1.31,1.56,1.67],mat('#a8d9d6'));
-addBox(instrument,'Layar garis data 2',[0.42,0.018,0.012],[-1.37,1.49,1.67],mat('#8ec9c6'));
-addBox(instrument,'Layar garis data 3',[0.48,0.018,0.012],[-1.34,1.42,1.67],mat('#8ec9c6'));
-for(let i=0;i<4;i++) addBox(instrument,'Tombol panel',[0.12,0.08,0.04],[-1.62+i*0.23,1.13,1.64],i===0?teal:steel,{clickable:true});
-addCylinder(instrument,'Tombol power',0.09,0.05,[0.05,1.25,1.62],teal);
-for(let i=0;i<3;i++) addBox(instrument,'Ventilasi sisi',[0.55,0.035,0.025],[1.7,1.72-i*0.12,1.5],dark);
-addBox(instrument,'Pegangan kompartemen',[0.46,0.08,0.14],[1.08,1.92,1.48],steel,{clickable:true});
-
-// Hinged compartment: lid pivots about its rear edge. Hinge local coordinates.
-const lidPivot = new THREE.Group();
-lidPivot.position.set(1.1,2.13,0.48); instrument.add(lidPivot);
-const lid = addBox(lidPivot,'Tutup kompartemen',[1.22,0.13,1.56],[0,0,0.52],white,{clickable:true});
-addBox(lidPivot,'Panel tutup atas',[1.14,0.035,1.46],[0,0.075,0.52],shellTop);
-addBox(instrument,'Rim kompartemen',[1.25,0.08,1.48],[1.1,2.17,0.5],dark);
-addBox(instrument,'Bingkai kompartemen',[1.12,0.05,1.34],[1.1,2.22,0.5],steel);
-addBox(instrument,'Dudukan kuvet',[0.54,0.1,0.62],[1.1,2.29,0.5],dark,{clickable:true});
-const cuvette = new THREE.Group(); cuvette.position.set(1.1,2.35,0.5); instrument.add(cuvette);
-addBox(cuvette,'Kuvet kaca',[0.22,0.42,0.22],[0,0.22,0],glass,{clickable:true});
-addBox(cuvette,'Larutan dalam kuvet',[0.17,0.23,0.17],[0,0.13,0],new THREE.MeshStandardMaterial({color:'#7cc9c4',transparent:true,opacity:0.7,roughness:0.12}));
-cuvette.visible=false;
-
-// Computer workstation to the right
-const computer = new THREE.Group(); computer.position.set(2.4,0,0.15); scene.add(computer);
-addBox(computer,'Keyboard base',[1.75,0.12,0.72],[0,0.56,0.48],dark);
-addBox(computer,'Keyboard surface',[1.62,0.035,0.61],[0,0.64,0.48],steel);
-for(let r=0;r<3;r++) for(let c=0;c<12;c++) addBox(computer,'Keyboard key',[0.085,0.025,0.09],[-0.68+c*0.124,0.675,0.25+r*0.14],dark);
-addBox(computer,'Monitor stand',[0.2,0.55,0.2],[0,0.95,-0.1],steel);
-addBox(computer,'Monitor frame',[1.9,1.22,0.14],[0,1.83,-0.18],dark,{clickable:true});
-addBox(computer,'Monitor bezel',[1.78,1.1,0.045],[0,1.84,-0.095],black);
-addBox(computer,'Layar komputer',[1.62,0.91,0.025],[0,1.86,-0.065],screenMat,{clickable:true});
-addBox(computer,'Software header',[1.47,0.09,0.012],[0,2.22,-0.048],teal);
-addBox(computer,'Software graph panel',[0.82,0.48,0.014],[-0.34,1.85,-0.047],mat('#203d48'));
-addBox(computer,'Software result panel',[0.45,0.48,0.014],[0.48,1.85,-0.047],mat('#284c55'));
-for(let i=0;i<5;i++) addBox(computer,'Kurva software',[0.16,0.018,0.015],[-0.65+i*0.15,1.73+Math.sin(i*0.7)*0.13,-0.034],mat('#8ce0c8'));
-addBox(computer,'Monitor foot',[0.58,0.06,0.35],[0,0.66,-0.1],steel);
-
-// Cable visually connecting instrument and computer
-const cableCurve = new THREE.CatmullRomCurve3([
- new THREE.Vector3(0.85,0.72,1.75), new THREE.Vector3(1.25,0.25,1.85),
- new THREE.Vector3(1.8,0.14,1.55), new THREE.Vector3(2.0,0.15,1.2),
- new THREE.Vector3(2.2,0.4,0.8)
-]);
-const cable = new THREE.Mesh(new THREE.TubeGeometry(cableCurve,48,0.035,8,false),dark); scene.add(cable);
-
-// small name plate
-addBox(instrument,'Label UV-1800',[0.7,0.17,0.025],[-0.15,1.05,1.57],mat('#f7f7f4'));
-addBox(instrument,'Label text strip',[0.5,0.025,0.012],[-0.15,1.07,1.59],teal);
-
-// Lights and ground shadow
-const shadow = new THREE.Mesh(new THREE.CircleGeometry(4.9,64),new THREE.MeshBasicMaterial({color:'#b7c7cc',transparent:true,opacity:0.2}));
-shadow.rotation.x=-Math.PI/2; shadow.position.set(0,0.005,0.1); scene.add(shadow);
-
-// state
-let isOpen=false, hasCuvette=false, measured=false;
-const statusText=document.getElementById('statusText'), statusDot=document.getElementById('statusDot');
-const measureMetric=document.getElementById('measureMetric');
-const partInfo=document.getElementById('partInfo');
-const wavelength=document.getElementById('wavelength'), concentration=document.getElementById('concentration');
-const wavelengthLabel=document.getElementById('wavelengthLabel'), waveMetric=document.getElementById('waveMetric');
-const resultWindow=document.getElementById('resultWindow'), absResult=document.getElementById('absResult'), transResult=document.getElementById('transResult');
-function updateStatus(){
- statusText.textContent=(isOpen?'Kompartemen terbuka':'Kompartemen tertutup')+' • '+(hasCuvette?'kuvet terpasang':'belum ada kuvet');
- statusDot.className='dot'+(hasCuvette&&!isOpen?' ok':'');
- document.getElementById('openBtn').disabled=isOpen;
- document.getElementById('closeBtn').disabled=!isOpen;
- document.getElementById('cuvetteBtn').disabled=!isOpen||hasCuvette;
- document.getElementById('measureBtn').disabled=isOpen||!hasCuvette;
- measureMetric.textContent=measured?'Selesai':'Standby';
-}
-function log(text){ const el=document.createElement('div'); el.textContent='• '+text; const box=document.getElementById('eventLog'); if(box){box.prepend(el);} }
-document.getElementById('openBtn').addEventListener('click',()=>{
- if(isOpen)return; isOpen=true; measured=false; lidPivot.rotation.x=-1.25; resultWindow.innerHTML='Kompartemen terbuka.<br>Pasang kuvet demonstrasi sebelum pengukuran.'; updateStatus();
-});
-document.getElementById('cuvetteBtn').addEventListener('click',()=>{
- if(!isOpen||hasCuvette)return; hasCuvette=true; cuvette.visible=true; resultWindow.innerHTML='Kuvet demonstrasi telah ditempatkan.<br>Tutup kompartemen untuk melanjutkan.'; updateStatus();
-});
-document.getElementById('closeBtn').addEventListener('click',()=>{
- if(!isOpen)return; isOpen=false; lidPivot.rotation.x=0; resultWindow.innerHTML=hasCuvette?'Kompartemen tertutup. Sistem siap untuk pengukuran simulasi.':'Kompartemen tertutup. Belum ada kuvet terpasang.'; updateStatus();
-});
-document.getElementById('resetBtn').addEventListener('click',()=>{
- isOpen=false;hasCuvette=false;measured=false;lidPivot.rotation.x=0;cuvette.visible=false;
- resultWindow.innerHTML='Instrument ready.<br>Load a cuvette and close the compartment to begin.';
- absResult.textContent='—';transResult.textContent='—';updateStatus();
-});
-document.getElementById('resetViewBtn').addEventListener('click',()=>{
- camera.position.set(8.7,6.3,10.7);controls.target.set(0,1.4,0);controls.update();
-});
-wavelength.addEventListener('input',()=>{
- wavelengthLabel.textContent=wavelength.value+' nm';waveMetric.innerHTML=wavelength.value+' <small>nm</small>';
-});
-document.getElementById('measureBtn').addEventListener('click',()=>{
- if(isOpen||!hasCuvette){resultWindow.textContent='Tidak dapat mengukur: pastikan kuvet terpasang dan kompartemen tertutup.';return;}
- const mode=document.getElementById('mode').value;
- const wl=Number(wavelength.value);
- const conc=Math.max(0,Math.min(100,Number(concentration.value)||0));
- let A=0;
- if(mode==='blank') A=0.002+Math.abs(wl-540)*0.00001;
- else if(mode==='scan') A=(conc*0.035)*Math.exp(-Math.pow((wl-540)/95,2));
- else A=0.035*conc*Math.exp(-Math.pow((wl-540)/120,2));
- A=Math.max(0,Math.min(3,A));
- const T=Math.pow(10,-A)*100;
- absResult.textContent=A.toFixed(3);transResult.textContent=T.toFixed(2)+'%';
- measured=true;measureMetric.textContent='Selesai';
- resultWindow.innerHTML='<strong>Measurement complete</strong><br>Mode: '+(mode==='blank'?'Blank check':mode==='scan'?'Wavelength scan (demo)':'Sample measurement')+
- '<br>λ = '+wl+' nm<br>Absorbance = '+A.toFixed(3)+' AU<br>Transmittance = '+T.toFixed(2)+'%<br><span style="color:#9fc6ca;font-size:10px">Educational simulated values</span>';
- updateStatus();
-});
-document.querySelectorAll('.tab').forEach(btn=>btn.addEventListener('click',()=>{
- document.querySelectorAll('.tab').forEach(b=>b.classList.toggle('active',b===btn));
- ['instrument','software','guide'].forEach(t=>document.getElementById('content-'+t).style.display=(btn.dataset.tab===t?'block':'none'));
-}));
-const info = {
- 'Base instrumen':'Base bawah memberikan dukungan pada bodi instrumen.',
- 'Casing utama':'Casing melindungi komponen optik dan elektronik internal. Bentuk internal pada model ini tidak merepresentasikan rancangan teknis resmi.',
- 'Panel depan':'Area kontrol depan pada model instrumen.',
- 'Layar instrumen':'Layar ilustratif untuk menampilkan status pengukuran.',
- 'Tombol panel':'Tombol kontrol ilustratif; kontrol interaktif utama tersedia di panel aplikasi.',
- 'Tombol power':'Tombol daya digambarkan untuk membantu pengenalan bentuk instrumen.',
- 'Tutup kompartemen':'Tutup berengsel dapat dibuka dan ditutup melalui kontrol. Buka sebelum memasukkan kuvet.',
- 'Dudukan kuvet':'Area tempat kuvet diletakkan dalam simulasi.',
- 'Kuvet kaca':'Kuvet demonstrasi berisi larutan ilustratif. Orientasi dan penggunaan kuvet nyata harus mengikuti SOP.',
- 'Monitor frame':'Monitor komputer virtual untuk antarmuka perangkat lunak edukasi.',
- 'Layar komputer':'Layar ini menggambarkan software kontrol simulasi, bukan perangkat lunak resmi Shimadzu.',
- 'Pegangan kompartemen':'Pegangan ilustratif pada penutup kompartemen.'
-};
-const raycaster=new THREE.Raycaster(), mouse=new THREE.Vector2();
-canvas.addEventListener('pointerdown',ev=>{
- const rect=canvas.getBoundingClientRect(); mouse.x=((ev.clientX-rect.left)/rect.width)*2-1; mouse.y=-((ev.clientY-rect.top)/rect.height)*2+1;
- raycaster.setFromCamera(mouse,camera);
- const hits=raycaster.intersectObjects(clickable,true);
- if(hits.length){
-   let obj=hits[0].object; let name=obj.name||'Bagian instrumen';
-   partInfo.innerHTML='<strong>'+name+'</strong><br>'+ (info[name]||'Bagian visual dari model 3D untuk membantu eksplorasi instrumen.');
- }
-});
-function resize(){
- const w=canvas.clientWidth,h=canvas.clientHeight;
- if(!w||!h)return;
- renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();
-}
-window.addEventListener('resize',resize); resize(); updateStatus();
-function animate(){requestAnimationFrame(animate);controls.update();renderer.render(scene,camera);}
-animate();
+function validReady(){if(lidOpen){document.getElementById('measurementStatus').textContent='Tutup kompartemen sebelum pembacaan.';return false;}if(!hasCuvette){document.getElementById('measurementStatus').textContent='Buka kompartemen, masukkan kuvet, lalu tutup kembali.';return false;}return true;}
+function setReadings(a){const t=100*Math.pow(10,-a);document.getElementById('absValue').textContent=a.toFixed(3);document.getElementById('transValue').textContent=t.toFixed(1);document.getElementById('readWl').textContent=wl.value;}
+document.getElementById('zeroBtn').onclick=()=>{if(!validReady())return;blankReady=true;document.getElementById('measurementStatus').textContent='Blanko simulasi berhasil ditetapkan sebagai referensi (A = 0).';setReadings(0);beam.visible=true;beam.material.color.set('#8bd8fa');drawChart();};
+document.getElementById('measureBtn').onclick=()=>{if(!validReady())return;if(!blankReady){document.getElementById('measurementStatus').textContent='Jalankan blanko terlebih dahulu agar pembacaan sampel memiliki referensi.';return;}const c=Math.max(0,Math.min(100,Number(document.getElementById('conc').value)||0));const a=absorbance(Number(wl.value),c);setReadings(a);measurementReady=true;beam.visible=true;beam.material.color.set('#20b7ef');document.getElementById('measurementStatus').textContent=`Pembacaan simulasi selesai pada ${wl.value} nm. Absorbansi dihitung dari model pita serapan demonstrasi.`;drawChart();};
+document.getElementById('scanBtn').onclick=()=>{if(!validReady())return;if(!blankReady){document.getElementById('measurementStatus').textContent='Jalankan blanko terlebih dahulu sebelum pemindaian.';return;}const c=Math.max(0,Math.min(100,Number(document.getElementById('conc').value)||0));drawChart();setReadings(absorbance(Number(wl.value),c));beam.visible=true;document.getElementById('measurementStatus').textContent='Pemindaian simulasi 200–800 nm selesai. Kurva memperlihatkan pita serapan demonstrasi di sekitar 540 nm.';};
+document.getElementById('resetBtn').onclick=()=>{blankReady=false;measurementReady=false;beam.visible=false;document.getElementById('absValue').textContent='—';document.getElementById('transValue').textContent='—';document.getElementById('readWl').textContent='—';document.getElementById('measurementStatus').textContent='Simulasi direset. Jalankan blanko kembali sebelum mengukur sampel.';drawChart();};
+document.getElementById('conc').addEventListener('input',drawChart);
+resize();status();drawChart();animate();
 </script>
 </body>
 </html>

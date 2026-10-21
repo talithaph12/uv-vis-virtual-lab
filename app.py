@@ -1,9 +1,10 @@
 import os
+from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
 st.set_page_config(
-    page_title="Virtual UV-Vis Laboratory",
+    page_title="Virtual UV-Vis Laboratory | V3",
     page_icon="🧪",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -11,68 +12,54 @@ st.set_page_config(
 
 st.markdown("""
 <style>
-  .block-container {padding-top: 1.2rem; padding-bottom: 2rem; max-width: 1500px;}
-  .hero {padding: 1.25rem 1.5rem; border-radius: 18px; background: linear-gradient(120deg,#e8f7f4,#f3f7fb); border: 1px solid #d6e9e6; margin-bottom: 1rem;}
-  .hero h1 {margin: 0; color: #153d43; font-size: 2rem;}
-  .hero p {margin: .4rem 0 0 0; color: #365b60;}
-  .small-note {color: #667085; font-size: .88rem;}
-  div[data-testid="stMetric"] {border: 1px solid #e6eaf0; padding: 12px; border-radius: 12px;}
+  .block-container {padding-top: 1.2rem; padding-bottom: 1.5rem;}
+  .hero {padding: 1.25rem 1.4rem; border-radius: 18px;
+         background: linear-gradient(120deg,#e5f7f4,#f3f7fb);
+         border: 1px solid #d7ebe8; margin-bottom: 1rem;}
+  .hero h1 {margin:0; color:#123f46; font-size:2rem;}
+  .hero p {margin:.4rem 0 0 0; color:#47646b;}
 </style>
-<div class="hero">
-  <h1>🧪 Virtual UV-Vis Laboratory</h1>
-  <p>Laboratorium virtual interaktif — model edukasi yang terinspirasi dari Shimadzu UV-1800.</p>
-</div>
 """, unsafe_allow_html=True)
 
 with st.sidebar:
     st.header("Panel praktikum")
-    page = st.radio(
-        "Pilih modul",
-        ["Laboratorium 3D", "Panduan penggunaan", "Tentang simulasi"],
-        index=0
-    )
+    page = st.radio("Pilih modul", ["Laboratorium 3D", "Panduan penggunaan", "Tentang simulasi"])
     st.divider()
-    st.caption("Tahap 2 • Model instrumen dan komputer virtual")
-    st.caption("Model edukasi, bukan perangkat atau perangkat lunak resmi Shimadzu.")
+    st.caption("Tahap 3 • Model instrumen, komponen interaktif, dan pembacaan simulasi")
+    st.caption("Model edukasi terinspirasi UV-1800; bukan perangkat atau perangkat lunak resmi Shimadzu.")
 
 if page == "Laboratorium 3D":
-    st.subheader("Instrumen dan workstation")
-    st.write("Putar model dengan menyeret mouse, gunakan scroll untuk zoom, lalu gunakan kontrol untuk membuka kompartemen dan menjalankan simulasi.")
-    html_path = os.path.join(os.path.dirname(__file__), "assets", "uv1800_lab.html")
-    with open(html_path, "r", encoding="utf-8") as f:
-        html = f.read()
-    components.html(html, height=1200, scrolling=False)
-    st.markdown(
-        '<p class="small-note">Petunjuk: gunakan tombol “Buka kompartemen”, “Masukkan kuvet”, “Tutup kompartemen”, dan “Ukur sampel” di dalam simulasi. '
-        'Hasil numerik merupakan data demonstrasi, bukan pengukuran instrumen sungguhan.</p>',
-        unsafe_allow_html=True
-    )
+    st.markdown("""
+    <div class="hero">
+      <h1>Virtual UV-Vis Laboratory</h1>
+      <p>Model 3D interaktif • penjelasan bagian alat • simulasi blanko, sampel, dan spektrum</p>
+    </div>
+    """, unsafe_allow_html=True)
+    st.info("Cara pakai: klik bagian alat untuk membaca fungsinya. Gunakan tab Kontrol untuk membuka kompartemen dan menjalankan simulasi pengukuran.")
+    html_path = Path(__file__).parent / "assets" / "uv1800_lab.html"
+    if not html_path.exists():
+        st.error(f"File model tidak ditemukan: {html_path}. Pastikan assets/uv1800_lab.html ikut diunggah ke GitHub.")
+    else:
+        html = html_path.read_text(encoding="utf-8")
+        components.html(html, height=1450, scrolling=True)
 
 elif page == "Panduan penggunaan":
-    st.subheader("Alur kerja praktikum virtual")
-    steps = [
-        ("1. Persiapan", "Pastikan model instrumen dan workstation terlihat. Kenali panel depan, layar, kompartemen kuvet, serta perangkat lunak virtual."),
-        ("2. Buka kompartemen", "Klik tombol untuk membuka tutup kompartemen. Model memperlihatkan dudukan kuvet di bagian dalam."),
-        ("3. Masukkan kuvet", "Klik tombol memasukkan kuvet. Kuvet demonstrasi akan muncul pada dudukannya."),
-        ("4. Tutup kompartemen", "Tutup kembali kompartemen sebelum pengukuran dimulai."),
-        ("5. Atur pengukuran", "Gunakan panel komputer virtual untuk memilih panjang gelombang dan mode pengukuran."),
-        ("6. Jalankan simulasi", "Klik Ukur Sampel untuk menampilkan hasil demonstrasi pada layar perangkat lunak dan panel instrumen."),
-    ]
-    for title, desc in steps:
-        with st.container(border=True):
-            st.markdown(f"**{title}**")
-            st.write(desc)
-    st.info("Dalam penggunaan nyata, prosedur blanko, pemilihan panjang gelombang, penanganan kuvet, dan keselamatan harus mengikuti SOP laboratorium serta manual instrumen.")
+    st.title("Panduan penggunaan")
+    st.markdown("""
+    1. **Jelajahi model:** seret mouse untuk memutar, gunakan scroll untuk zoom, lalu klik bagian alat untuk membaca penjelasan.
+    2. **Buka kompartemen:** pilih tab Kontrol, kemudian tekan *Buka kompartemen*.
+    3. **Masukkan kuvet:** tekan *Masukkan kuvet*. Kuvet hanya dapat dipasang saat kompartemen terbuka.
+    4. **Tutup kompartemen:** tutup sebelum melakukan pengukuran.
+    5. **Blanko:** pilih Blanko lalu tekan *Jalankan pembacaan blanko* untuk menetapkan referensi simulasi.
+    6. **Sampel:** pilih Sampel, masukkan konsentrasi demonstrasi, lalu tekan *Ukur sampel*.
+    7. **Spektrum:** jalankan pemindaian untuk melihat kurva absorbansi terhadap panjang gelombang.
 
-else:
-    st.subheader("Tentang simulator")
-    st.write("""
-    Aplikasi ini merupakan media pembelajaran untuk membantu mahasiswa mengenali bentuk instrumen UV-Vis dan memahami urutan kerja analisis secara visual.
-
-    **Batasan versi ini**
-    - Bentuk instrumen adalah model 3D perkiraan yang dibuat dari geometri dasar.
-    - Komputer dan antarmuka pengukuran adalah tampilan perangkat lunak fiktif untuk pendidikan.
-    - Nilai absorbansi/transmitansi yang tampil adalah nilai simulasi.
-    - Belum ada koneksi fisik ke spektrofotometer atau komunikasi dengan perangkat keras.
+    **Catatan ilmiah:** nilai absorbansi, transmitansi, dan spektrum dihasilkan oleh model matematis edukasi. Aplikasi tidak terhubung ke instrumen fisik.
     """)
-    st.write("Pengembangan berikutnya dapat menambahkan simulasi blanko dan sampel, hukum Beer-Lambert, kurva kalibrasi, regresi linear, dan perhitungan kadar.")
+elif page == "Tentang simulasi":
+    st.title("Tentang simulasi")
+    st.markdown("""
+    Aplikasi ini merupakan rekonstruksi edukasi berbasis Three.js yang terinspirasi dari bentuk umum spektrofotometer UV-Vis Shimadzu UV-1800.
+
+    **Batasan:** geometri bukan CAD resmi, tampilan tidak dimaksudkan untuk identifikasi komponen internal secara servis, dan pembacaan bukan data eksperimen nyata. Proses optik ditampilkan sebagai ilustrasi untuk membantu memahami alur sumber cahaya → pemilih panjang gelombang → kuvet → detektor → pembacaan.
+    """)
